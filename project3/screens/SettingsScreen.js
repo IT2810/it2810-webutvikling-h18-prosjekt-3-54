@@ -1,14 +1,49 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { ExpoConfigView } from '@expo/samples';
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  AsyncStorage,
+  Button,
+  Alert
+} from 'react-native';
 
-export default class SettingsScreen extends React.Component {
-  static navigationOptions = {
-    title: 'app.json',
-  };
+
+  export default class SettingsScreen extends React.Component {
+
+  static navigationOptions = ({navigation}) => {
+    const { params = {} } = navigation.state;
+    return {
+      title: "Contacts",
+      headerRight:<Button
+                    onPress={() => params.handleCreateNewContact()}
+                    title="+"
+                    color="#33b2ff"
+                    accessibilityLabel="Click to create a new contact."
+                  />
+    }
+  }
+
+  componentDidMount() {
+    this.props.navigation.setParams({ handleCreateNewContact: this._createNewContact });
+    }
+
+  _createNewContact = () => {
+    alert("Coming soon.");
+  }
 
   render() {
-    /* Go ahead and delete ExpoConfigView and replace it with your
-     * content, we just wanted to give you a quick view of your config */
-    return <ExpoConfigView />;
+    return (
+      <View>
+        <ScrollView>
+          
+        </ScrollView>
+      </View>
+    );
   }
 }
