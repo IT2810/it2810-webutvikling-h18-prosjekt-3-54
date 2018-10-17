@@ -4,27 +4,29 @@ import {
   Image,
   Platform,
   ScrollView,
+  ListView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
   AsyncStorage,
-  Button,
-  Alert
+  Button
 } from 'react-native';
 import t from 'tcomb-form-native';
+import Row from '../components/Row';
 
 const Form = t.form.Form;
 
 const User = t.struct({
-  name: t.String,
+  firstname: t.String,
+  lastName: t.maybe(t.String),
   number: t.String,
   email: t.maybe(t.String)
 });
 
 const options = {
   fields: {
-    name: {
+    firstname: {
       error: 'Please enter a name.'
     },
     number: {
@@ -33,7 +35,18 @@ const options = {
   },
 };
 
-  export default class SettingsScreen extends React.Component {
+
+export default class ContactsScreen extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    //datasource listview/table
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    this.state = {
+      dataSource: ds.cloneWithRows(['row1', 'row2']),
+    };
+  }
 
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
@@ -62,6 +75,7 @@ const options = {
     const value = this._form.getValue();
   }
 
+
   render() {
     return (
       <View style = {styles.container}>
@@ -75,6 +89,12 @@ const options = {
             //style = {styles.buttons}
             color="#841584"
           />
+
+          <ListView
+          dataSource={this.state.dataSource}
+          renderRow={(data) => <Row {...data} />}
+          />
+
         </ScrollView>
       </View>
     );

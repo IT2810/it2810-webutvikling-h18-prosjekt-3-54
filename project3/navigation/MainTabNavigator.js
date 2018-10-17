@@ -4,8 +4,8 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import CalendarScreen from '../screens/HomeScreen';
-import ActivityScreen from '../screens/LinksScreen';
-import ContactsScreen from '../screens/SettingsScreen';
+import ActivityScreen from '../screens/ActivityScreen';
+import ContactsScreen from '../screens/ContactsScreen';
 
 const CalendarStack = createStackNavigator({
   Calendar: CalendarScreen,
