@@ -4,7 +4,7 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import CalendarScreen from '../screens/HomeScreen';
-import ActivityScreen from '../screens/ActivityScreen';
+import LocationScreen from '../screens/LocationScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 
 const CalendarStack = createStackNavigator({
@@ -25,16 +25,16 @@ CalendarStack.navigationOptions = {
   ),
 };
 
-const ActivityStack = createStackNavigator({
-  Activity: ActivityScreen,
+const LocationStack = createStackNavigator({
+  Location: LocationScreen,
 });
 
-ActivityStack.navigationOptions = {
-  tabBarLabel: 'Activity',
+LocationStack.navigationOptions = {
+  tabBarLabel: 'Location',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? `ios-walk${focused ? '' : '-outline'}` : 'md-link'}
+      name={Platform.OS === 'ios' ? `ios-walk${focused ? '' : '-outline'}` : 'md-globe'}
     />
   ),
 };
@@ -55,6 +55,6 @@ ContactsStack.navigationOptions = {
 
 export default createBottomTabNavigator({
   CalendarStack,
-  ActivityStack,
+  LocationStack,
   ContactsStack,
 });
