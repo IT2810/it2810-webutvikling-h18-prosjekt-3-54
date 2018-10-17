@@ -8,12 +8,11 @@ export default class LocationScreen extends React.Component {
     title: 'Location',
   };
   state = {
-    location: null,
-    errorMessage: null,
     coords: {
-        longitude: null,
-        latitude: null,
+        longitude: 15.25512,
+        latitude: 54.25296,
     },
+    deltas: 100,
     savedCoords: {
         longitude: null,
         latitude: null,
@@ -25,16 +24,14 @@ export default class LocationScreen extends React.Component {
   getCurrentLoc = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
-      this.setState({
-        errorMessage: 'Permission to access location was denied',
-      });
+      alert.alert('Location error', 'Permission to access location was denied.');
     }
 
     let location = await Location.getCurrentPositionAsync({});
     let coordsLatitude = location.coords.latitude;
     let coordsLongitude = location.coords.longitude;
-    this.setState({ location });
-    this.setState({ coords: {latitude: coordsLatitude, longitude: coordsLongitude} });    
+    this.setState({ coords: {latitude: coordsLatitude, longitude: coordsLongitude} }); 
+    this.setState({deltas: 0.02});   
   };
   
 
@@ -45,7 +42,7 @@ export default class LocationScreen extends React.Component {
     try {
       await AsyncStorage.setItem('coords', JSON.stringify(coords));
     } catch (error) {
-      console.log("error saving data");
+      alert.alert('Location saving error');
     }
   }
 
@@ -60,18 +57,20 @@ export default class LocationScreen extends React.Component {
         let coordsLongitude = savedCoords.longitude;
         this.setState({ coords: {latitude: coordsLatitude,
                                 longitude: coordsLongitude} });
+        this.setState({deltas: 0.02});
       }
      } catch (error) {
-       console.log('Error retrieving data');
+      alert.alert('Data retrieving error');
      }
   }
 
   //Brukes av MapView for å sette området kartet skal vise.
-  getMapRegion = () => ({
+  getMapRegion = () => (   
+    {
     latitude: this.state.coords.latitude,
     longitude: this.state.coords.longitude,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02
+    latitudeDelta: this.state.deltas,
+    longitudeDelta: this.state.deltas
   });
 
 
@@ -87,10 +86,10 @@ export default class LocationScreen extends React.Component {
     }
 
     //Hvis det fins koordinater å vise, vises de med en Marker.
-    if (this.state.coords.longitude) {
+    if (this.state.coords.latitude !== 54.25296) {
         locationMarker = <MapView.Marker coordinate={this.state.coords} />;
     }
-    
+   
 
 
     return (
@@ -98,12 +97,10 @@ export default class LocationScreen extends React.Component {
         <View style={styles.button}><Button onPress={this.getCurrentLoc} title="Your location" /></View>
         <View style={styles.button}><Button style={styles.button} onPress={this.saveLoc} title="Save your location" /></View>
         <View style={styles.button}><Button style={styles.button} onPress={this.showLastLoc} title="Show last saved location" /></View>
-    
-        <MapView
-            style={styles.map}
-            region={this.getMapRegion()}>
-            {locationMarker}
-            </MapView>
+        <MapView style={styles.map} region={this.getMapRegion()}>
+         {locationMarker} 
+         </MapView>
+        
       </View>
     );
   }
