@@ -4,9 +4,7 @@ import { Location, Permissions } from 'expo';
 import MapView from 'react-native-maps';
 
 export default class LocationScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Location',
-  };
+  
   state = {
     coords: {
         longitude: 15.25512,
