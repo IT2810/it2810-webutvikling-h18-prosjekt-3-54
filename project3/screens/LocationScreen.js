@@ -7,6 +7,7 @@ export default class LocationScreen extends React.Component {
   
   state = {
     coords: {
+        identifikator: 'coords',
         longitude: 15.25512,
         latitude: 54.25296,
     },
@@ -36,7 +37,7 @@ export default class LocationScreen extends React.Component {
   //Henter lokasjonen til devicen og lagrer nåværende koordinater på devicen.
   saveLoc = async () => {
     let location = await Location.getCurrentPositionAsync({});
-    let coords = {longitude: location.coords.longitude, latitude: location.coords.latitude};
+    let coords = {identifikator: 'coords', longitude: location.coords.longitude, latitude: location.coords.latitude};
     try {
       await AsyncStorage.setItem('coords', JSON.stringify(coords));
     } catch (error) {

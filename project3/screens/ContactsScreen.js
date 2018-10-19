@@ -13,7 +13,7 @@ import {
   Button,
   Modal,
   TouchableHighlight,
-  FlatList
+  FlatList,
 } from 'react-native';
 import t from 'tcomb-form-native';
 import Row from '../components/Row';
@@ -50,7 +50,7 @@ export default class ContactsScreen extends React.Component {
     this.state = {
       dataSource: ds.cloneWithRows(['row1', 'row2']),
       modalVisible: false,
-      data: [],
+      data: [], //Contacs information will go in here
     };
   }
 
@@ -62,25 +62,62 @@ export default class ContactsScreen extends React.Component {
     const { params = {} } = navigation.state;
     return {
       title: "Contacts",
+      titleStyle: {
+        alignSelf: 'center',
+      },
       headerRight:<Button
                     onPress={() => params.handleCreateNewContact()}
                     title="New contact"
                     color="#33b2ff"
                     accessibilityLabel="Click to create a new contact."
-                  />,
+                  />
+                  ,
       headerLeft:<Button
                     onPress={() => params.handleDeleteAllContacts()}
                     title="Delete all"
                     color="#33b2ff"
                     accessibilityLabel="Click to delete all contacts."
-                    />
+                    />,
+      
     }
   }
 
   componentDidMount() {
     this.props.navigation.setParams({ handleCreateNewContact: this._createNewContact });
     this.props.navigation.setParams({ handleDeleteAllContacts: this._deleteAllContacts });
+    this.fetchData();
   }
+
+
+
+  fetchData = async () => {
+    let contacts = []
+    try {
+      let keys = await AsyncStorage.getAllKeys()
+        .then((ks) => {
+          console.log("all keys = " + ks);
+          ks.forEach((k) => {
+            AsyncStorage.getItem(k)
+            .then((v) => {
+              //add to dict/array
+              let value = JSON.parse(v);
+              
+              if(value.identifikator === 'contact') {
+                let contact = {'fullName': value.fullName, 'number' : value.number, 'email': value.email}
+                contacts.push(contact);
+                //console.log(contacts);
+                this.setState({data: contacts});
+                
+              }
+            });
+          });
+        });
+        
+      } catch (error) {
+      console.log("error consoleTest");
+    }
+  }
+
 
   // opens the modal window where a new contact may be created
   _createNewContact = () => {
@@ -88,30 +125,55 @@ export default class ContactsScreen extends React.Component {
   }
 
   //deletes all keys from async
-  _deleteAllContacts = async () => {
+  /*_deleteAllContacts = async () => {
     try {
       AsyncStorage.getAllKeys()
       .then(AsyncStorage.multiRemove)
     } catch (error) {
       console.log("clear error");
     }
+    this.setState({data: []});
   }
-
+*/
+_deleteAllContacts = async () => {
+  try {
+    let keys = await AsyncStorage.getAllKeys()
+      .then((ks) => {
+        ks.forEach((k) => {
+          AsyncStorage.getItem(k)
+          .then((v) => {
+            let value = JSON.parse(v);
+            
+            if(value.identifikator === 'contact') {
+              let key=JSON.stringify(value.fullName);
+              AsyncStorage.removeItem(key);          
+              console.log(key);
+              
+              
+            }
+          });
+        });
+      });
+      
+    } catch (error) {
+    console.log("error consoleTest");
+  }
+  this.setState({data: []});
+}
   //saves the new contacts in asyncStorage
   _handleSaveContact = async () => {
     const value = this._form.getValue();
     let contactFullName = value['fullName'];
     let contactNumber = value['number'];
-    let newContact = {fullName: contactFullName, number: contactNumber};
+    let contactEmail = value['email'];
+    let newContact = {identifikator: 'contact', fullName: contactFullName, number: contactNumber, email: contactEmail};
     try {
       await AsyncStorage.setItem(contactFullName, JSON.stringify(newContact));
-      //updateTable() ??
-
       this.setModalVisible(!this.state.modalVisible);
     } catch (error) {
       console.log("error saving contact");
     }
-    this._consoleTest();
+    this.fetchData();
   }
 
   //basically to just iterate keys and values for logging
@@ -161,6 +223,7 @@ export default class ContactsScreen extends React.Component {
     return (
       <View style = {styles.container}>
         <Modal
+          style={styles.modalStyle}
           animationType="slide"
           transparent={false}
           visible={this.state.modalVisible}>
@@ -181,18 +244,23 @@ export default class ContactsScreen extends React.Component {
             />
           </View>
         </Modal>
-        
-      
-      <ListView
-          dataSource={this.state.dataSource}
-          //renderRow={this.renderRow.bind(this)}
-          renderRow={(rowData => <Text>{rowData}</Text>)}
+        <FlatList
+        data={this.state.data}
+        keyExtractor={(x, i) => i}
+        renderItem={({item}) => 
+        <Text style={styles.listTextStyle}>Navn: {item.fullName}, Tlf: {item.number}, Email: {item.email}</Text>}
       />
+      
+      
+      
 
       </View>
     );
   }
 }
+
+
+      
 
   const styles = StyleSheet.create({
     container: {
@@ -210,19 +278,23 @@ export default class ContactsScreen extends React.Component {
     addButton: {
       color: '#841584',
     },
-    /*
-    separator: {
-      flex: 1,
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: '#8E8E8E',
-    },
-    */
+    
     listStyle: {
       height: 35,
     },
     listTextStyle: {
       fontSize: 16,
       color: '#000000',
-    }
+      textAlign: 'center',
+      margin: 10,
+
+    },
+    modalStyle: {
+      justifyContent: 'center',
+      shadowRadius: 12,
+      height: 30,
+      width: 150,
+
+    },
   });
   
