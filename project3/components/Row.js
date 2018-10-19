@@ -6,6 +6,19 @@ import {
     Image,
 } from 'react-native';
 
+const Row = (props) => (
+    <View style={rowStyle.container}>
+    
+        {/*}{`${props.name.firstName} ${props.name.lastName}`}*/}
+        
+        <Text style={rowStyle.text}>
+            {`${"Fornavn"} ${"Etternavn"}`}
+            
+        </Text>
+
+    </View>
+)
+
 const rowStyle = StyleSheet.create({
     container: {
         flex: 1,
@@ -17,37 +30,6 @@ const rowStyle = StyleSheet.create({
         marginLeft: 12,
         fontSize: 16,
     },
-    photo: {    
-        height: 40,
-        width: 40,
-        borderRadius: 20,
-    },
 });
-
-const Row = (props) => (
-    <View style={rowStyle.container}>
-        <Image
-            source={
-            __DEV__
-                ? require('../assets/images/robot-prod.png')
-                : require('../assets/images/robot-dev.png')
-            }
-        />
-
-        {/*}
-        <Text style={rowStyle.text}>
-            {`${"Fornavn"} ${"Etternavn"}`}
-        </Text>
-        */}
-        
-        
-        <Text style={rowStyle.text}>
-            {/*}{`${props.name.firstName} ${props.name.lastName}`}*/}
-            fornavn etternavn
-        </Text>
-    
-        
-    </View>
-)
 
 export default Row;
