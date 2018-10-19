@@ -8,10 +8,10 @@ export default class LocationScreen extends React.Component {
   state = {
     coords: {
         identifikator: 'coords',
-        longitude: 15.25512,
+        longitude: 15.25512, //for å vise europa på startup
         latitude: 54.25296,
     },
-    deltas: 100,
+    deltas: 100, //for å zoome helt ut på startup
     savedCoords: {
         longitude: null,
         latitude: null,
@@ -84,7 +84,7 @@ export default class LocationScreen extends React.Component {
 
     }
 
-    //Hvis det fins koordinater å vise, vises de med en Marker.
+    //Hvis det fins reelle koordinater å vise, vises de med en Marker.
     if (this.state.coords.latitude !== 54.25296) {
         locationMarker = <MapView.Marker coordinate={this.state.coords} />;
     }
@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
   },
-
   map: {
       flex: 1,
       width: '100%',
@@ -123,7 +122,6 @@ const styles = StyleSheet.create({
       paddingTop: 10,
       paddingBottom: 10,
   },
-
   button: {
     padding: 10,
   },
