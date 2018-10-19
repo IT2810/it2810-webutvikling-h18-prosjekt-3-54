@@ -131,7 +131,7 @@ export default class HomeScreen extends React.Component {
     this.setModalVisible(!this.state.modalVisible);
   }
 
-  //metode for å lage ny todo
+  //metode for å lage ny todo 
   _handleAddTodo = async () => {
     const value = this._form.getValue();
     let newTitle = value['title'];
