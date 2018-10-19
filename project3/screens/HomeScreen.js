@@ -23,7 +23,7 @@ import { Header } from 'react-navigation';
 const Form = t.form.Form;
 const todo = t.struct({
   title: t.String,
-  todo: t.String,
+  todo: t.maybe(t.String),
 });
 
 const options = {
@@ -62,10 +62,8 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
     return {
-      title: "Todos",
-      titleStyle: {
-        alignSelf: 'center',
-      },
+      title: "",
+      
       headerRight:<Button
                     onPress={() => params.handleCreateNewTodo()}
                     title="New Todo"
@@ -91,14 +89,31 @@ export default class HomeScreen extends React.Component {
     this.setModalVisible(true);
   }
 
+
+
   _deleteAll = async () => {
     try {
-      AsyncStorage.getAllKeys()
-      .then(AsyncStorage.multiRemove)
-    } catch (error) {
-      console.log("clear error");
+      let keys = await AsyncStorage.getAllKeys()
+        .then((ks) => {
+          ks.forEach((k) => {
+            AsyncStorage.getItem(k)
+            .then((v) => {
+              let value = JSON.parse(v);
+              if(value.identifikator === 'todo') {
+                let key = value.title;
+                AsyncStorage.removeItem(key);          
+                console.log(key);
+                
+                
+              }
+            });
+          });
+        });
+        
+      } catch (error) {
+      console.log("error consoleTest");
     }
-    this.setState({data: []});
+    this.setState({Todos: []});
   }
 
   _handleCancelSave = () => {
@@ -128,14 +143,12 @@ export default class HomeScreen extends React.Component {
           ks.forEach((k) => {
             AsyncStorage.getItem(k)
             .then((v) => {
-              //add to dict/array
               let value = JSON.parse(v);
               
               if(value.identifikator === 'todo') {
                 let todo = {'title': value.title, 'todo' : value.todo}
                 todos.push(todo);
-                //console.log(contacts);
-                this.setState({data: todos});
+                this.setState({Todos: todos});
                 
               }
             });
@@ -172,12 +185,15 @@ export default class HomeScreen extends React.Component {
             />
           </View>
         </Modal>
+        <Text style={styles.heading}>TODOs</Text>
         <FlatList
-        data={this.state.data}
+        data={this.state.Todos}
         keyExtractor={(x, i) => i}
         renderItem={({item}) => 
-        <Text style={styles.listTextStyle}>Tittel: {item.title}, Todo: {item.todo}</Text>}
+        <Text style={styles.listTextStyle}>Do this: {item.title}, {item.todo}</Text>}
       />
+      
+      
       
       
       
@@ -236,4 +252,11 @@ const styles = StyleSheet.create({
     margin: 10,
 
   },
+  heading: {
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+
+  }
+  
 });

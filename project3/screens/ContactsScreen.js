@@ -1,26 +1,18 @@
 import React, {Component} from 'react';
-import { ExpoConfigView } from '@expo/samples';
 import {
-  Image,
-  Platform,
-  ScrollView,
-  ListView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
   AsyncStorage,
   Button,
   Modal,
-  TouchableHighlight,
   FlatList,
 } from 'react-native';
 import t from 'tcomb-form-native';
-import Row from '../components/Row';
 import { Header } from 'react-navigation';
 
+
 const Form = t.form.Form;
-//imported tcomb for creation of contact form
 const User = t.struct({
   fullName: t.String,
   number: t.Number,
@@ -38,17 +30,13 @@ const options = {
   },
 };
 
-let contactList = [];
 
 export default class ContactsScreen extends React.Component {
 
   constructor(props) {
     super(props);
 
-    //datasource
-    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
-      dataSource: ds.cloneWithRows(['row1', 'row2']),
       modalVisible: false,
       data: [], //Contacs information will go in here
     };
@@ -61,10 +49,8 @@ export default class ContactsScreen extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
     return {
-      title: "Contacts",
-      titleStyle: {
-        alignSelf: 'center',
-      },
+      title: "",
+
       headerRight:<Button
                     onPress={() => params.handleCreateNewContact()}
                     title="New contact"
@@ -124,17 +110,7 @@ export default class ContactsScreen extends React.Component {
     this.setModalVisible(true);
   }
 
-  //deletes all keys from async
-  /*_deleteAllContacts = async () => {
-    try {
-      AsyncStorage.getAllKeys()
-      .then(AsyncStorage.multiRemove)
-    } catch (error) {
-      console.log("clear error");
-    }
-    this.setState({data: []});
-  }
-*/
+  // deletes every key tagged with 'contact'
 _deleteAllContacts = async () => {
   try {
     let keys = await AsyncStorage.getAllKeys()
@@ -143,13 +119,9 @@ _deleteAllContacts = async () => {
           AsyncStorage.getItem(k)
           .then((v) => {
             let value = JSON.parse(v);
-            
             if(value.identifikator === 'contact') {
-              let key=JSON.stringify(value.fullName);
-              AsyncStorage.removeItem(key);          
-              console.log(key);
-              
-              
+              let key = value.title;
+              AsyncStorage.removeItem(key);
             }
           });
         });
@@ -176,48 +148,12 @@ _deleteAllContacts = async () => {
     this.fetchData();
   }
 
-  //basically to just iterate keys and values for logging
-  _consoleTest = async () => {
-    let newC = [];
-    try {
-      let keys = AsyncStorage.getAllKeys()
-        .then((ks) => {
-          console.log("all keys = " + ks);
-          ks.forEach((k) => {
-            AsyncStorage.getItem(k)
-            .then((v) => {
-              //add to dict/array
-              let valueL = JSON.parse(v);
-              console.log("Name = " + k + ", Number = " + valueL.number);
-
-            });
-          });
-        });
-    } catch (error) {
-      console.log("error consoleTest");
-    }
-  }
-
   // removes modal and goes back to Contact window
   _handleCancelSaveContact = () => {
     this.setModalVisible(!this.state.modalVisible);
   }
 
-  renderRow(rowData, sectionID, rowID) {
-    return (
-      <TouchableHighlight underlayColor='#dddddd' style={styles.listStyle}>
-        <View>
-          <Text style={styles.listTextStyle} numberOfLines={1}>{rowData}</Text>
-          <View style={{height: 1, backgroundColor:'#000000'}}></View>
-        </View>
-      </TouchableHighlight>
-    )
-  }
 
-  _renderItem = (props) => {
-    var person = props['item'];
-    return
-  }
 
   render() {
     return (
@@ -244,6 +180,7 @@ _deleteAllContacts = async () => {
             />
           </View>
         </Modal>
+        <Text style={styles.heading}>Contacts</Text>
         <FlatList
         data={this.state.data}
         keyExtractor={(x, i) => i}
@@ -296,5 +233,11 @@ _deleteAllContacts = async () => {
       width: 150,
 
     },
+    heading: {
+      fontSize: 20,
+      textAlign: 'center',
+      fontWeight: 'bold',
+  
+    }
   });
   
