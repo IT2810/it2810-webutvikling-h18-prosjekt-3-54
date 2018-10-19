@@ -12,14 +12,14 @@ const CalendarStack = createStackNavigator({
 });
 
 CalendarStack.navigationOptions = {
-  tabBarLabel: 'Calendar',
+  tabBarLabel: 'To do',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-calendar${focused ? '' : '-outline'}`
-          : 'md-information-circle'
+          ? `ios-checkbox${focused ? '' : '-outline'}`
+          : 'md-checkbox'
       }
     />
   ),
@@ -34,7 +34,7 @@ LocationStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? `ios-walk${focused ? '' : '-outline'}` : 'md-globe'}
+      name={Platform.OS === 'ios' ? `ios-globe${focused ? '' : '-outline'}` : 'md-globe'}
     />
   ),
 };
@@ -48,7 +48,7 @@ ContactsStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? `ios-contacts${focused ? '' : '-outline'}` : 'md-options'}
+      name={Platform.OS === 'ios' ? `ios-contacts${focused ? '' : '-outline'}` : 'md-contacts'}
     />
   ),
 };
