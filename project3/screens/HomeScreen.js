@@ -18,6 +18,8 @@ import {
 } from 'react-native';
 import t from 'tcomb-form-native';
 import { Header } from 'react-navigation';
+import { ToDoBodyAndroid } from '../components/ToDoBodyAndroid';
+import { BodyIos } from '../components/BodyIos';
 
 //skjemaet man fyller ut for å lage en todo har slik struktur
 const Form = t.form.Form;
@@ -25,6 +27,7 @@ const todo = t.struct({
   title: t.String,
   todo: t.maybe(t.String),
 });
+
 const options = {
   fields: {
     title: {
@@ -36,6 +39,10 @@ const options = {
   },
 };
 
+export const Body = Platform.select({
+  android: ToDoBodyAndroid,
+  ios: BodyIos,
+});
 
 export default class HomeScreen extends React.Component {
   
@@ -60,8 +67,14 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
     return {
-      title: "", //ingen tittel i header, bruker heller <Text> field med litt stor størrelse, i render
-      
+      ...Platform.select({
+        ios: {
+          title: "TODOs",
+          titleStyle: {
+          alignSelf: 'center',
+          },
+        },
+      }),   
       //knapp for å lage ny todo
       headerRight:<Button
                     onPress={() => params.handleCreateNewTodo()}
@@ -185,7 +198,7 @@ export default class HomeScreen extends React.Component {
             />
           </View>
         </Modal>
-        <Text style={styles.heading}>TODOs</Text>
+        <Body />>
         <FlatList
         data={this.state.Todos}
         keyExtractor={(x, i) => i}
