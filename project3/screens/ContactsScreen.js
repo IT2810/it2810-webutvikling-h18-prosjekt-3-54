@@ -10,8 +10,7 @@ import {
 } from 'react-native';
 import t from 'tcomb-form-native';
 import { Header } from 'react-navigation';
-import { BodyAndroid } from '../components/BodyAndroid';
-import { BodyIos } from '../components/BodyIos';
+
 
 
 const Form = t.form.Form;
@@ -32,10 +31,6 @@ const options = {
   },
 };
 
-export const Body = Platform.select({
-  android: BodyAndroid,
-  ios: BodyIos,
-});
 
 export default class ContactsScreen extends React.Component {
 
@@ -55,14 +50,8 @@ export default class ContactsScreen extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
     return {
-      ...Platform.select({
-        ios: {
-          title: "Contacts",
-          titleStyle: {
-          alignSelf: 'center',
-          },
-        },
-      }),
+      title: "",
+      
 
       headerRight:<Button
                     onPress={() => params.handleCreateNewContact()}
@@ -193,7 +182,7 @@ _deleteAllContacts = async () => {
             />
           </View>
         </Modal>
-        <Body />
+        <Text style={styles.heading}>Contacts</Text>
         <FlatList
         data={this.state.data}
         keyExtractor={(x, i) => i}

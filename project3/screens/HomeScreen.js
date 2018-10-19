@@ -18,8 +18,7 @@ import {
 } from 'react-native';
 import t from 'tcomb-form-native';
 import { Header } from 'react-navigation';
-import { ToDoBodyAndroid } from '../components/ToDoBodyAndroid';
-import { BodyIos } from '../components/BodyIos';
+
 
 //skjemaet man fyller ut for å lage en todo har slik struktur
 const Form = t.form.Form;
@@ -39,10 +38,6 @@ const options = {
   },
 };
 
-export const Body = Platform.select({
-  android: ToDoBodyAndroid,
-  ios: BodyIos,
-});
 
 export default class HomeScreen extends React.Component {
   
@@ -67,14 +62,8 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = ({navigation}) => {
     const { params = {} } = navigation.state;
     return {
-      ...Platform.select({
-        ios: {
-          title: "TODOs",
-          titleStyle: {
-          alignSelf: 'center',
-          },
-        },
-      }),   
+      title: "",
+        
       //knapp for å lage ny todo
       headerRight:<Button
                     onPress={() => params.handleCreateNewTodo()}
@@ -198,7 +187,7 @@ export default class HomeScreen extends React.Component {
             />
           </View>
         </Modal>
-        <Body />>
+        <Text style={styles.heading}>Contacts</Text>
         <FlatList
         data={this.state.Todos}
         keyExtractor={(x, i) => i}
