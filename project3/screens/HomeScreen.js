@@ -7,144 +7,195 @@ import {
   Text,
   TouchableOpacity,
   View,
+  FlatList,
+  SectionList,
+  Button,
+  TextInput,
+  AsyncStorage,
+  ListView,
+  Modal,
+  TouchableHighlight,
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import t from 'tcomb-form-native';
+import { Header } from 'react-navigation';
 
-import { MonoText } from '../components/StyledText';
+
+const Form = t.form.Form;
+const todo = t.struct({
+  title: t.String,
+  todo: t.String,
+});
+
+const options = {
+  fields: {
+    title: {
+      error: 'Please enter a valid title.'
+    },
+    todo: {
+      error: 'Please enter what to do in text.'
+    }
+  },
+};
+
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
+  
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      modalVisible: false,
+      Todos: [],
+      appointments: [],
+  
+    };
+  }
+
+  
+
+  componentDidMount() {
+    this.props.navigation.setParams({ handleCreateNewTodo: this._createNewTodo });
+    this.props.navigation.setParams({ handleDeleteAll: this._deleteAll });
+    this.fetchData();
+  }
+
+  static navigationOptions = ({navigation}) => {
+    const { params = {} } = navigation.state;
+    return {
+      title: "Todos",
+      titleStyle: {
+        alignSelf: 'center',
+      },
+      headerRight:<Button
+                    onPress={() => params.handleCreateNewTodo()}
+                    title="New Todo"
+                    color="#33b2ff"
+                    accessibilityLabel="Click to create a new Todo."
+                  />
+                  ,
+      headerLeft:<Button
+                    onPress={() => params.handleDeleteAll()}
+                    title="Delete all"
+                    color="#33b2ff"
+                    accessibilityLabel="Click to delete all Todos."
+                    />,
+      
+    }
+  }
+
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+
+  _createNewTodo = () => {
+    this.setModalVisible(true);
+  }
+
+  _deleteAll = async () => {
+    try {
+      AsyncStorage.getAllKeys()
+      .then(AsyncStorage.multiRemove)
+    } catch (error) {
+      console.log("clear error");
+    }
+    this.setState({data: []});
+  }
+
+  _handleCancelSave = () => {
+    this.setModalVisible(!this.state.modalVisible);
+  }
+
+  _handleAddTodo = async () => {
+    const value = this._form.getValue();
+    let newTitle = value['title'];
+    let newText = value['todo'];
+    let newTodo = {identifikator: 'todo', title: newTitle, todo: newText};
+    try {
+      await AsyncStorage.setItem(newTitle, JSON.stringify(newTodo));
+      this.setModalVisible(!this.state.modalVisible);
+    } catch (error) {
+      console.log("error saving Todo");
+    }
+    this.fetchData();
+  }
+
+  fetchData = async () => {
+    let todos = []
+    try {
+      let keys = await AsyncStorage.getAllKeys()
+        .then((ks) => {
+          console.log("all keys = " + ks);
+          ks.forEach((k) => {
+            AsyncStorage.getItem(k)
+            .then((v) => {
+              //add to dict/array
+              let value = JSON.parse(v);
+              
+              if(value.identifikator === 'todo') {
+                let todo = {'title': value.title, 'todo' : value.todo}
+                todos.push(todo);
+                //console.log(contacts);
+                this.setState({data: todos});
+                
+              }
+            });
+          });
+        });
+        
+      } catch (error) {
+      console.log("error consoleTest");
+    }
+  }
+  
 
   render() {
     return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
+      <View style = {styles.container}>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.modalVisible}>
+          <View style = {styles.modalContainer}>
+
+            <Form type={todo}
+              ref={c => this._form = c}
+              options={options} />
+            <Button
+              title = "Cancel"
+              onPress = {this._handleCancelSave}
+              style = {styles.cancelButton}
+            />
+            <Button
+              title="Add"
+              onPress={this._handleAddTodo}
+              style = {styles.addButton}
             />
           </View>
+        </Modal>
+        <FlatList
+        data={this.state.data}
+        keyExtractor={(x, i) => i}
+        renderItem={({item}) => 
+        <Text style={styles.listTextStyle}>Tittel: {item.title}, Todo: {item.todo}</Text>}
+      />
+      
+      
+      
 
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
-
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-
-            <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
-            </View>
-
-            <Text style={styles.getStartedText}>
-              halo23
-            </Text>
-          </View>
-
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>vg</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
-
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
-        </View>
       </View>
     );
   }
 
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
+  
 
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use useful development
-          tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
-  }
-
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
-
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://vg.no'
-    );
-  };
+  
 }
 
 const styles = StyleSheet.create({
   container: {
+    justifyContent: 'center',
     flex: 1,
     backgroundColor: '#fff',
-  },
-  developmentModeText: {
-    marginBottom: 20,
-    color: 'rgba(0,0,0,0.4)',
-    fontSize: 14,
-    lineHeight: 19,
-    textAlign: 'center',
-  },
-  contentContainer: {
-    paddingTop: 30,
-  },
-  welcomeContainer: {
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  welcomeImage: {
-    width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10,
-  },
-  getStartedContainer: {
-    alignItems: 'center',
-    marginHorizontal: 50,
-  },
-  homeScreenFilename: {
-    marginVertical: 7,
-  },
-  codeHighlightText: {
-    color: 'rgba(96,100,109, 0.8)',
-  },
-  codeHighlightContainer: {
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 3,
-    paddingHorizontal: 4,
-  },
-  getStartedText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    lineHeight: 24,
-    textAlign: 'center',
   },
   tabBarInfoContainer: {
     position: 'absolute',
@@ -171,18 +222,18 @@ const styles = StyleSheet.create({
     color: 'rgba(96,100,109, 1)',
     textAlign: 'center',
   },
-  navigationFilename: {
-    marginTop: 5,
+  button: {
+    padding: 10      
   },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center',
+  modalContainer: {
+    padding: 20,
+    marginTop: Header.HEIGHT,
   },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    fontSize: 14,
-    color: '#2e78b7',
+  listTextStyle: {
+    fontSize: 16,
+    color: '#000000',
+    textAlign: 'center',
+    margin: 10,
+
   },
 });
