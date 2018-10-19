@@ -120,7 +120,7 @@ _deleteAllContacts = async () => {
           .then((v) => {
             let value = JSON.parse(v);
             if(value.identifikator === 'contact') {
-              let key = value.title;
+              let key = value.fullName;
               AsyncStorage.removeItem(key);
             }
           });
